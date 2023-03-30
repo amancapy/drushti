@@ -1,5 +1,5 @@
 import random
-from chunk_formats import formats
+from chunk_formats import formats, fonts
 import numpy as np
 
 
@@ -86,7 +86,7 @@ def word(ln=None):
         w.append(letter())
 
     w = "".join(w)
-    for c, replacement in zip(('\\', '<', '>', '&', '?'), ("&lt;", "&gt;", "&amp;", "&quot;", "&apos;")):
+    for c, replacement in zip(('&', '<', '>'), ("&amp;", "&lt;", "&gt;")):
         w = w.replace(c, replacement)
     return "".join(w)
 
@@ -104,35 +104,19 @@ def sentence(ln=None):
             s.append(random.choice(_breaks))
 
     s.append(word())
-    s.append(str(np.random.choice([c for c in ".?!"], p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4),
-                                                                                               p=[0.4, 0.4, 0.2]))
+    s.append(str(np.random.choice(list(".?!"), p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4), p=[0.4, 0.4, 0.2]))
     return s
 
 
-_p_L = 10
-_p_ps = _p_dist(1.5, 0.5, _p_L)
+_p_L = 25
+_p_ps = _p_dist(6, 5, _p_L)
 
 
 def paragraph(ln=None):
-    p = []
     ln = np.random.choice(range(1, _p_L + 1), p=_p_ps) if ln is None else ln
-    for _ in range(ln - 1):
-        p.append(sentence())
-        p.append(" ")
-    p.append(sentence())
+    p = [sentence() for _ in range(ln)]
 
     return p
-
-
-def chapter(ln):
-    c = [[" ".join([word() for _ in range(random.randint(1, 8))])]]
-    for _ in range(ln-1):
-        c.append(paragraph())
-        if _prob(0.1):
-            c.append([" ".join([word() + " " for _ in range(random.randint(1, 8))])])
-    c.append(paragraph())
-
-    return c
 
 
 def word_xml(text, bold=False, italics=False, underline=False, strikethrough=False):
@@ -142,12 +126,12 @@ def word_xml(text, bold=False, italics=False, underline=False, strikethrough=Fal
             w = w.replace(replacement, formats['word']['params'][replacement])
         else:
             w = w.replace(replacement, "")
-    w = w.replace("text_here", text)
+    w = w.replace("text_here", text + " ")
 
     return w
 
 
-def paragraph_xml(p, style="Normal", s_before=480, s_after=0, f_name="Gautami", f_size=40):
+def paragraph_xml(p, style="Normal", s_before=480, s_after=0,  f_size=40, f_name="Gautami"):
     body = ""
 
     for s in p:
@@ -162,14 +146,87 @@ def paragraph_xml(p, style="Normal", s_before=480, s_after=0, f_name="Gautami", 
     return body
 
 
-def doc_xml(ps, left_margin=1440, right_margin=1440, header=1440, top=1979, footer=1440, bottom=1979, line_pitch=100):
+def doc_xml(ps):
     body = "\n".join(ps)
 
     body = formats['document']['body'].replace("paragraphs_here", body)
-    for kwarg, replacement in zip((left_margin, right_margin, header, top, footer, bottom, line_pitch), formats['document']['params'].keys()):
-        body = body.replace(replacement, str(kwarg))
+    for key in formats['document']['params'].keys():
+        body = body.replace(key, str(random.choice(formats['document']['params'][key])))
 
     print(body)
 
 
-doc_xml([paragraph_xml(paragraph()) for _ in range(5)])
+def header_xml(w1=None, w2=None, w3=None):
+    body = ""
+    for w in w1, w2, w3:
+        if w is not None:
+            body += word_xml(w, _prob(0.05), _prob(0.05), _prob(0.01), _prob(0.01))
+        body += formats['header']['tab']
+
+    body = formats['header']['body'].replace("header_here", body)
+
+    for key in formats['header']['params'].keys():
+        body = body.replace(key, str(random.choice(formats['header']['params'][key])))
+
+    return body
+
+
+def footer_xml(w1=None, w2=None, w3=None):
+    body = ""
+    for w in w1, w2, w3:
+        if w is not None:
+            body += word_xml(w, _prob(0.05), _prob(0.1), _prob(0.01), _prob(0.01))
+        body += formats['footer']['tab']
+
+    body = formats['footer']['body'].replace("footer_here", body)
+
+    for key in formats['footer']['params'].keys():
+        body = body.replace(key, str(random.choice(formats['footer']['params'][key])))
+
+    return body
+
+
+def docgen():
+    body = ""
+    run = []
+
+    for _ in range(25):
+        if _prob(0.2):
+            p = [[word() + " " for _ in range(random.randint(1, 10))]]
+            body += paragraph_xml(
+                p,
+                style="Heading", s_before=random.randint(400, 550),
+                s_after=random.randint(0, 100),
+                f_size=random.randint(30, 50),
+                f_name=random.choice(fonts))
+        else:
+            p = paragraph()
+            body += paragraph_xml(p, style="Normal", s_after=random.randint(0, 100), f_size=random.randint(20, 30), f_name=random.choice(fonts))
+
+        run.append(p)
+
+        if _prob(0.3):
+            body += paragraph_xml([[("*" + random.randint(1, 5) * " ") * random.randint(2, 7)]], style="Heading", f_size=random.randint(10, 30), f_name=random.choice(fonts))
+
+        body += paragraph_xml([["\n" * random.randint(1, 3)]], f_name=random.choice(fonts))
+
+        for key in formats['paragraph']['params'].keys():
+            body = body.replace(key, str(random.choice(formats['paragraph']['params'][key])))
+
+    for key in formats['document']['params'].keys():
+        body = body.replace(key, str(random.choice(formats['document']['params'][key])))
+
+    body = formats['document']['body'].replace("paragraphs_here", body)
+
+    return body, run
+
+
+def header_footer_gen(horf):
+    ws = [word() if _prob(0.33) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
+
+    if horf == "h":
+        return header_xml(*ws)
+    else:
+        return footer_xml(*ws)
+
+
