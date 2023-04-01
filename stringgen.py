@@ -222,7 +222,7 @@ def docgen():
 
 
 def header_footer_gen(horf):
-    ws = [word() if _prob(0.33) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
+    ws = [word() if _prob(0.5) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
 
     if horf == "h":
         return header_xml(*ws)

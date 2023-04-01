@@ -89,7 +89,7 @@ formats = {
     'header': {
         'params': {
             'font_name': fonts,
-            'font_size': range(10, 20),
+            'font_size': range(15, 25),
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr '
@@ -117,7 +117,7 @@ formats = {
     'footer': {
         'params': {
             'font_name': fonts,
-            'font_size': range(10, 20),
+            'font_size': range(15, 25),
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '
@@ -134,9 +134,7 @@ formats = {
                 'xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" '
                 'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 '
                 'w15"><w:p><w:pPr><w:pStyle w:val="Footer"/><w:rPr><w:rFonts w:ascii="font_name" w:hAnsi="font_name" '
-                'w:cs="font_name"/><w:b/><w:b/><w:bCs/><w:i/><w:i/><w:iCs/><w:sz w:val="font_size"/><w:szCs '
-                'w:val="font_size"/><w:u'
-                'w:val="single"/></w:rPr></w:pPr>'
+                'w:cs="font_name"/><w:sz w:val="font_size"/><w:szCs w:val="font_size"/></w:rPr></w:pPr>'
                 '\nfooter_here\n'
                 '</w:p></w:ftr>',
 
