@@ -1,5 +1,5 @@
 # drushti
-Deep Reading of Scanned Texts with 2D self-attention
+Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
 
 Timeline:
 
