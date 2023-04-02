@@ -49,13 +49,13 @@ def letter(first=False):
     ltr = [chr(_start + random.choice(_consonants))]
 
     cons = None
-    if _prob(0.4):
+    if _prob(0.2):
         ltr.append(chr(_start + 77))
 
         cons = random.choice(_consonants)
         ltr.append(chr(_start + cons))
 
-        if random.random() > 0.9:
+        if _prob(0.01):
             ltr.append(chr(_start + 77))
 
             cons2 = random.choice(_consonants)
@@ -101,10 +101,10 @@ def sentence(ln=None):
     for _ in range(ln - 1):
         s.append(word())
         if _prob(0.3):
-            s.append(random.choice(_breaks))
+            s[-1] += (random.choice(_breaks))
 
     s.append(word())
-    s.append(str(np.random.choice(list(".?!"), p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4), p=[0.4, 0.4, 0.2]))
+    s[-1] += (str(np.random.choice(list(".?!"), p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4), p=[0.4, 0.4, 0.2]))
     return s
 
 
@@ -126,7 +126,7 @@ def word_xml(text, bold=False, italics=False, underline=False, strikethrough=Fal
             w = w.replace(replacement, formats['word']['params'][replacement])
         else:
             w = w.replace(replacement, "")
-    w = w.replace("text_here", text + " ")
+    w = w.replace("text_here", text)
 
     return w
 
@@ -136,7 +136,7 @@ def paragraph_xml(p, style="Normal", s_before=480, s_after=0,  f_size=40, f_name
 
     for s in p:
         for w in s:
-            body += word_xml(w, _prob(0.05), _prob(0.1), _prob(0.01), _prob(0.01))
+            body += word_xml(w + " ", _prob(0.05), _prob(0.1), _prob(0.01), _prob(0.01))
             body += "\n"
 
     body = formats['paragraph']['body'].replace("word_here", body)
@@ -144,16 +144,6 @@ def paragraph_xml(p, style="Normal", s_before=480, s_after=0,  f_size=40, f_name
         body = body.replace(replacement, str(kwarg))
 
     return body
-
-
-def doc_xml(ps):
-    body = "\n".join(ps)
-
-    body = formats['document']['body'].replace("paragraphs_here", body)
-    for key in formats['document']['params'].keys():
-        body = body.replace(key, str(random.choice(formats['document']['params'][key])))
-
-    print(body)
 
 
 def header_xml(w1=None, w2=None, w3=None):
@@ -190,14 +180,14 @@ def docgen():
     body = ""
     run = []
 
-    for _ in range(25):
+    for _ in range(3):
         if _prob(0.2):
             p = [[word() + " " for _ in range(random.randint(1, 10))]]
             body += paragraph_xml(
                 p,
                 style="Heading", s_before=random.randint(400, 550),
                 s_after=random.randint(0, 100),
-                f_size=random.randint(30, 50),
+                f_size=random.randint(25, 45),
                 f_name=random.choice(fonts))
         else:
             p = paragraph()
