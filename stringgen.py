@@ -131,7 +131,7 @@ def word_xml(text, bold=False, italics=False, underline=False, strikethrough=Fal
     return w
 
 
-def paragraph_xml(p, style="Normal", s_before=480, s_after=0,  f_size=40, f_name="Gautami"):
+def paragraph_xml(p, style="Normal",  f_size=40, f_name="Gautami"):
     body = ""
 
     for s in p:
@@ -140,7 +140,8 @@ def paragraph_xml(p, style="Normal", s_before=480, s_after=0,  f_size=40, f_name
             body += "\n"
 
     body = formats['paragraph']['body'].replace("word_here", body)
-    for kwarg, replacement in zip((style, s_before, s_after, f_name, f_size), formats['paragraph']['params'].keys()):
+
+    for kwarg, replacement in zip((style, f_name, f_size), ('paragraph_style', 'font_name', 'font_size')):
         body = body.replace(replacement, str(kwarg))
 
     return body
@@ -180,18 +181,17 @@ def docgen():
     body = ""
     run = []
 
-    for _ in range(3):
+    for _ in range(5):
         if _prob(0.2):
             p = [[word() + " " for _ in range(random.randint(1, 10))]]
             body += paragraph_xml(
                 p,
-                style="Heading", s_before=random.randint(400, 550),
-                s_after=random.randint(0, 100),
+                style="Heading",
                 f_size=random.randint(25, 45),
                 f_name=random.choice(fonts))
         else:
             p = paragraph()
-            body += paragraph_xml(p, style="Normal", s_after=random.randint(0, 100), f_size=random.randint(20, 30), f_name=random.choice(fonts))
+            body += paragraph_xml(p, style="Normal", f_size=random.randint(20, 41), f_name=random.choice(fonts))
 
         run.append(p)
 
@@ -203,10 +203,10 @@ def docgen():
         for key in formats['paragraph']['params'].keys():
             body = body.replace(key, str(random.choice(formats['paragraph']['params'][key])))
 
-    for key in formats['document']['params'].keys():
-        body = body.replace(key, str(random.choice(formats['document']['params'][key])))
-
     body = formats['document']['body'].replace("paragraphs_here", body)
+    for key in formats['document']['params'].keys():
+        val = random.choice(formats['document']['params'][key])
+        body = body.replace(key, str(random.choice(formats['document']['params'][key])))
 
     return body, run
 

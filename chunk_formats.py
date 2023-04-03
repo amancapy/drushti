@@ -11,13 +11,18 @@ fonts = ["Baloo Tammudu 2", "Baloo Tammudu", "GIST-TLOTChandana", "Dhurjati", "G
 formats = {
     'document': {
         'params': {
-            'left_margin': range(1100, 1600),
-            'right_margin': range(1100, 1600),
-            'header_': range(1100, 1600),
-            'top_': range(1800, 2200),
-            'footer_': range(1100, 1600),
-            'bottom_': range(1800, 2200),
-            'line_pitch': range(50, 150)
+            'left_margin': range(1000, 1800),
+            'right_margin': range(1000, 1800),
+            'header_': range(1000, 1800),
+            'top_': range(1500, 2500),
+            'footer_': range(1000, 1800),
+            'bottom_': range(1500, 2500),
+            'line_pitch': range(50, 250),
+            'page_w': range(9000, 16000),
+            'page_h': range(12000, 20000),
+            'header_margin': range(1200, 1600),
+            'char_space': range(0, 1000),
+            'gutter_': range(0, 1000)
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '
@@ -35,11 +40,11 @@ formats = {
                 'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 w15"><w:body>'
                 '\nparagraphs_here\n'
                 '<w:sectPr><w:headerReference w:type="default" r:id="rId2"/><w:footerReference w:type="default" '
-                'r:id="rId3"/><w:type w:val="nextPage"/><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:left="1440" '
-                'w:right="1440" w:gutter="0" w:header="1440" w:top="1979" w:footer="1440" '
-                'w:bottom="1979"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection '
-                'w:val="lrTb"/><w:docGrid w:type="default" w:linePitch="100" '
-                'w:charSpace="0"/></w:sectPr></w:body></w:document>'
+                'r:id="rId3"/><w:type w:val="nextPage"/><w:pgSz w:w="page_w" w:h="page_h"/><w:pgMar w:left="left_margin" '
+                'w:right="right_margin" w:gutter="gutter_" w:header="header_" w:top="top_" w:footer="footer_" '
+                'w:bottom="bottom_"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection '
+                'w:val="lrTb"/><w:docGrid w:type="default" w:linePitch="line_pitch" '
+                'w:charSpace="char_space"/></w:sectPr></w:body></w:document>'
     },
 
     'paragraph': {
