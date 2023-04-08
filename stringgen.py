@@ -108,7 +108,7 @@ def sentence(ln=None):
     return s
 
 
-_p_L = 25
+_p_L = 15
 _p_ps = _p_dist(6, 5, _p_L)
 
 
@@ -131,13 +131,20 @@ def word_xml(text, bold=False, italics=False, underline=False, strikethrough=Fal
     return w
 
 
-def paragraph_xml(p, style="Normal",  f_size=40, f_name="Gautami"):
+def paragraph_xml(p, style="Normal",  f_size=30, f_name="Gautami"):
     body = ""
 
+    run = ""
     for s in p:
         for w in s:
-            body += word_xml(w + " ", _prob(0.05), _prob(0.1), _prob(0.01), _prob(0.01))
-            body += "\n"
+            b, i, u, s = _prob(0.03), _prob(0.03), _prob(0.01), _prob(0.01)
+            if not (b or i or u or s):
+                run += w + " "
+            else:
+                if run:
+                    body += word_xml(run + " ", False, False, False, False)
+                    run = ""
+                body += word_xml(w + " ", bold=b, italics=i, underline=u, strikethrough=s)
 
     body = formats['paragraph']['body'].replace("word_here", body)
 
@@ -147,32 +154,19 @@ def paragraph_xml(p, style="Normal",  f_size=40, f_name="Gautami"):
     return body
 
 
-def header_xml(w1=None, w2=None, w3=None):
+def header_footer_xml(horf="h", w1=None, w2=None, w3=None):
+    horf = "header" if horf == "h" else "footer"
     body = ""
     for w in w1, w2, w3:
         if w is not None:
-            body += word_xml(w, _prob(0.05), _prob(0.05), _prob(0.01), _prob(0.01))
-        body += formats['header']['tab']
+            b, i, u, s = _prob(0.03), _prob(0.03), _prob(0.01), _prob(0.01)
+            body += word_xml(w, bold=b, italics=i, underline=u, strikethrough=s)
+        body += formats[horf]['tab']
 
-    body = formats['header']['body'].replace("header_here", body)
+    body = formats[horf]['body'].replace(f"{horf}_here", body)
 
-    for key in formats['header']['params'].keys():
-        body = body.replace(key, str(random.choice(formats['header']['params'][key])))
-
-    return body
-
-
-def footer_xml(w1=None, w2=None, w3=None):
-    body = ""
-    for w in w1, w2, w3:
-        if w is not None:
-            body += word_xml(w, _prob(0.05), _prob(0.1), _prob(0.01), _prob(0.01))
-        body += formats['footer']['tab']
-
-    body = formats['footer']['body'].replace("footer_here", body)
-
-    for key in formats['footer']['params'].keys():
-        body = body.replace(key, str(random.choice(formats['footer']['params'][key])))
+    for key in formats[horf]['params'].keys():
+        body = body.replace(key, str(random.choice(formats[horf]['params'][key])))
 
     return body
 
@@ -181,7 +175,7 @@ def docgen():
     body = ""
     run = []
 
-    for _ in range(5):
+    for _ in range(2):
         if _prob(0.2):
             p = [[word() + " " for _ in range(random.randint(1, 10))]]
             body += paragraph_xml(
@@ -189,13 +183,14 @@ def docgen():
                 style="Heading",
                 f_size=random.randint(25, 45),
                 f_name=random.choice(fonts))
-        else:
-            p = paragraph()
-            body += paragraph_xml(p, style="Normal", f_size=random.randint(20, 41), f_name=random.choice(fonts))
+            run.append(p)
+
+        p = paragraph()
+        body += paragraph_xml(p, style="Normal", f_size=random.randint(20, 41), f_name=random.choice(fonts))
 
         run.append(p)
 
-        if _prob(0.3):
+        if _prob(0.2):
             body += paragraph_xml([[("*" + random.randint(1, 5) * " ") * random.randint(2, 7)]], style="Heading", f_size=random.randint(10, 30), f_name=random.choice(fonts))
 
         body += paragraph_xml([["\n" * random.randint(1, 3)]], f_name=random.choice(fonts))
@@ -205,7 +200,6 @@ def docgen():
 
     body = formats['document']['body'].replace("paragraphs_here", body)
     for key in formats['document']['params'].keys():
-        val = random.choice(formats['document']['params'][key])
         body = body.replace(key, str(random.choice(formats['document']['params'][key])))
 
     return body, run
@@ -215,8 +209,8 @@ def header_footer_gen(horf):
     ws = [word() if _prob(0.5) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
 
     if horf == "h":
-        return header_xml(*ws)
+        return header_footer_xml("h", *ws)
     else:
-        return footer_xml(*ws)
+        return header_footer_xml("f", *ws)
 
 

@@ -11,18 +11,18 @@ fonts = ["Baloo Tammudu 2", "Baloo Tammudu", "GIST-TLOTChandana", "Dhurjati", "G
 formats = {
     'document': {
         'params': {
-            'left_margin': range(1000, 1800),
-            'right_margin': range(1000, 1800),
-            'header_': range(1000, 1800),
-            'top_': range(1500, 2500),
-            'footer_': range(1000, 1800),
-            'bottom_': range(1500, 2500),
-            'line_pitch': range(50, 250),
-            'page_w': range(9000, 16000),
-            'page_h': range(12000, 20000),
+            'left_margin': range(1200, 1500),
+            'right_margin': range(1200, 1500),
+            'header_': range(1200, 1500),
+            'top_': range(1800, 2200),
+            'footer_': range(1200, 1500),
+            'bottom_': range(1800, 2200),
+            'line_pitch': range(0, 150),
+            'page_w': range(12000, 16000),
+            'page_h': range(17000, 21000),
             'header_margin': range(1200, 1600),
-            'char_space': range(0, 1000),
-            'gutter_': range(0, 1000)
+            'char_space': range(0, 500),
+            'gutter_': range(0, 500)
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '
@@ -53,8 +53,8 @@ formats = {
             'spacing_before': range(350, 550),
             'spacing_after': range(0, 100),
             'font_name': fonts,
-            'font_size': range(30, 50),
-            'align': ["left", "center", "right", "both"]
+            'font_size': range(30, 40),
+            'align': [*["left"] * 4, *["center"]*3, *["right"]*1, *["both"]*4]
         },
 
         'body': '<w:p>\n'
