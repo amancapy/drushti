@@ -4,7 +4,7 @@ Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
 Timeline:
 
 
-8/4: Still frustratingly stuck on the pdf-png conversion, which will be the final step in being done with the data generation. What's annoying is that I am for now unable to clip the text where the pdf ends because pdf encoding means I can't directly know what the last word in the text is directly. Still I hope it won't be too much trouble this far in.
+8/4: Still frustratingly stuck on the pdf-png conversion, which will be the final step in being done with the data generation. What's annoying is that I am for now unable to clip the text where the pdf ends because pdf encoding means I can't directly know what the last word in the text is. Still I hope it won't be too much trouble this far in.
 
 
 2/4: Tantalizingly close to being done with generating the data. Current bottleneck is how absurdly slow and inconvenient the docx to pdf to png pipeline is. Hypothesis is that the libreoffice server is being called to life for each conversion, and one would rather convert as a batch as many docx at once as the character limit on termnial commands will allow. This means that there won't be a single continuous pipeline from scratch to png, but a manual stop at docxing first, and so on. Nevertheless once the data part is done (and god willing), I will be allowed to have some fun. THe issue of cutting off the text wrt the first page in the document is very much alive and kicking, and it seems that after the pdfing is done, there will be a small detour to match the last word in the pdf to the repr, cutting them both off there, and moving on. 
