@@ -175,23 +175,23 @@ def docgen():
     body = ""
     run = []
 
-    for _ in range(2):
+    for _ in range(random.randint(1, 4)):
         if _prob(0.2):
             p = [[word() + " " for _ in range(random.randint(1, 10))]]
             body += paragraph_xml(
                 p,
                 style="Heading",
-                f_size=random.randint(25, 45),
+                f_size=random.randint(30, 45),
                 f_name=random.choice(fonts))
             run.append(p)
 
         p = paragraph()
-        body += paragraph_xml(p, style="Normal", f_size=random.randint(20, 41), f_name=random.choice(fonts))
+        body += paragraph_xml(p, style="Normal", f_size=random.randint(30, 40), f_name=random.choice(fonts))
 
         run.append(p)
 
         if _prob(0.2):
-            body += paragraph_xml([[("*" + random.randint(1, 5) * " ") * random.randint(2, 7)]], style="Heading", f_size=random.randint(10, 30), f_name=random.choice(fonts))
+            body += paragraph_xml([[("*" + random.randint(1, 5) * " ") * random.randint(2, 7)]], style="Heading", f_size=random.randint(30, 55), f_name=random.choice(fonts))
 
         body += paragraph_xml([["\n" * random.randint(1, 3)]], f_name=random.choice(fonts))
 

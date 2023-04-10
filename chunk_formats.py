@@ -11,18 +11,18 @@ fonts = ["Baloo Tammudu 2", "Baloo Tammudu", "GIST-TLOTChandana", "Dhurjati", "G
 formats = {
     'document': {
         'params': {
-            'left_margin': range(1200, 1500),
-            'right_margin': range(1200, 1500),
-            'header_': range(1200, 1500),
+            'left_margin': range(900, 1500),
+            'right_margin': range(900, 1500),
+            'header_': range(900, 1500),
             'top_': range(1800, 2200),
-            'footer_': range(1200, 1500),
+            'footer_': range(900, 1500),
             'bottom_': range(1800, 2200),
             'line_pitch': range(0, 150),
             'page_w': range(12000, 16000),
             'page_h': range(17000, 21000),
-            'header_margin': range(1200, 1600),
-            'char_space': range(0, 500),
-            'gutter_': range(0, 500)
+            'header_margin': range(900, 1600),
+            'char_space': range(0, 100),
+            'gutter_': range(0, 100)
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '
@@ -53,7 +53,7 @@ formats = {
             'spacing_before': range(350, 550),
             'spacing_after': range(0, 100),
             'font_name': fonts,
-            'font_size': range(30, 40),
+            'font_size': range(30, 45),
             'align': [*["left"] * 4, *["center"]*3, *["right"]*1, *["both"]*4]
         },
 
@@ -94,7 +94,7 @@ formats = {
     'header': {
         'params': {
             'font_name': fonts,
-            'font_size': range(15, 25),
+            'font_size': range(15, 30),
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr '
@@ -122,7 +122,7 @@ formats = {
     'footer': {
         'params': {
             'font_name': fonts,
-            'font_size': range(15, 25),
+            'font_size': range(15, 30),
         },
 
         'body': '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '

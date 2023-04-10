@@ -1,4 +1,3 @@
-import asyncio
 import os
 import time
 import zipfile
@@ -6,7 +5,8 @@ import shutil
 import tqdm
 from stringgen import docgen, header_footer_gen
 import subprocess as sp
-import PyPDF2 as pdf2
+from distutils.dir_util import copy_tree
+import docx
 
 
 """
@@ -20,76 +20,86 @@ alignment !
 italics !
 bold (will hurt readability) !
 n. columns (for future)
-paper darkness (comes in post pdf)
+paper darkness (comes in post png)
 """
 
 
-PATH = "/home/amankp/drst_saves"
+PATH = "/home/amankp/drst"
+n_docxs = 1000
 
 
-for subdirname in ("docxes", "reprs", "pdfs", "single_page_pdfs", "dev"):
+if not os.path.exists(PATH):
+    os.mkdir(PATH)
+
+
+for subdirname in ("docxes", "dev", "texts", "pngs"):
     if not os.path.exists(PATH + "/" + subdirname):
         os.mkdir(PATH + "/" + subdirname)
+null = open(PATH + os.devnull, "w")
 
 
-n_subdirs = 8
-# for i in range(n_subdirs):
-#     if not os.path.exists(PATH + f"/docxes/subdir{i}"):
-#         os.mkdir(PATH + f"/docxes/subdir{i}")
-#
-#
-n_docxs = 1000
-# subdir = 0
-# for i in tqdm.tqdm(range(n_docxs)):
-#     shutil.copy("filing/template.zip", "filing/temptemplate.zip")
-#     if not os.path.exists("filing/temp"):
-#         os.mkdir("filing/temp")
-#
-#     docxml, ps = docgen()
-#
-#     with open(PATH + f"/reprs/repr{i}.txt", "w+") as f:
-#         ps = [["".join([w + " " for w in s[:-1]]) + s[-1] for s in p] for p in ps]
-#         ps = ["".join([s + " " for s in p[:-1]]) + p[-1] for p in ps]
-#         ps = "".join([p + "\n" for p in ps[:-1]]) + ps[-1]
-#
-#         f.write(ps)
-#
-#     h, f = header_footer_gen("h"), header_footer_gen("f")
-#     for content, fname in zip((docxml, h, f), ("document", "header1", "footer1")):
-#         with open(f"filing/temp/{fname}.xml", "w+") as f:
-#             f.write(content)
-#
-#     with zipfile.ZipFile("filing/temptemplate.zip", "a") as z:
-#         for fname in "document", "header1", "footer1":
-#             z.write(f"filing/temp/{fname}.xml", f"word/{fname}.xml")
-#
-#     if i % (n_docxs // n_subdirs) == 0 and i:
-#         subdir += 1
-#
-#     shutil.copy("filing/temptemplate.zip", PATH + f"/docxes/subdir{subdir}/doc{i}.docx")
-#
-#     shutil.rmtree("filing/temp")
-#     os.remove("filing/temptemplate.zip")
-#
-#
-# a = time.time()
-# null = open(PATH + os.devnull, "w")
-# sp.call(" & ".join([f"nohup libreoffice --headless -env:UserInstallation=file:///tmp/test{i} --convert-to pdf {PATH}/docxes/subdir{i}/* --outdir {PATH}/pdfs" for i in range(n_subdirs)]), shell=True, stdout=null)
+n_workers = 8
+for i in range(n_workers):
+    if not os.path.exists(PATH + f"/docxes/{i}"):
+        os.mkdir(PATH + f"/docxes/{i}")
+
+for i in range(n_workers):
+    if not os.path.exists(f"/home/amankp/.config/libreoffice/user{i}"):
+        copy_tree("/home/amankp/.config/libreoffice/4", f"/home/amankp/.config/libreoffice/workers/user{i}")
 
 
-for i in range(n_docxs):
-    print(i)
-    with open(PATH + f'/pdfs/doc{i}.pdf', 'rb') as file:
-        pdf_reader = pdf2.PdfReader(file)
+def to_docx():
+    subdir = 0
+    for i in tqdm.tqdm(range(n_docxs)):
+        if i % (n_docxs // n_workers) == 0 and i:
+            subdir += 1
 
-        pdf_writer = pdf2.PdfWriter()
+        shutil.copy("filing/template.zip", "filing/temptemplate.zip")
+        if not os.path.exists("filing/temp"):
+            os.mkdir("filing/temp")
 
-        pdf_writer.add_page(pdf_reader.pages[0])
+        docxml, ps = docgen()
 
-        with open(PATH + f'/single_page_pdfs/doc{i}.pdf', 'wb') as output_file:
-            pdf_writer.write(output_file)
+        h, f = header_footer_gen("h"), header_footer_gen("f")
+        for content, fname in zip((docxml, h, f), ("document", "header1", "footer1")):
+            with open(f"filing/temp/{fname}.xml", "w+") as f:
+                f.write(content)
 
-        with open(PATH + f'/single_page_pdfs/doc{i}.pdf', 'rb') as file:
-            text = pdf2.PdfReader(file).pages[0].extract_text()
-            print(text)
-    exit()
+        with zipfile.ZipFile("filing/temptemplate.zip", "a") as z:
+            for fname in "document", "header1", "footer1":
+                z.write(f"filing/temp/{fname}.xml", f"word/{fname}.xml")
+
+        shutil.copy("filing/temptemplate.zip", PATH + f"/docxes/{subdir}/doc{i}.docx")
+
+        shutil.rmtree("filing/temp")
+        os.remove("filing/temptemplate.zip")
+
+    breaks = range(0, n_docxs + 1, n_docxs // n_workers)
+
+    clip_cmd = " & ".join([
+        f'libreoffice --nologo --nofirststartwizard --invisible'
+        f' -env:UserInstallation=file:///home/amankp/.config/libreoffice/workers/user{j}'
+        f' "macro:///Standard.Module1.del({breaks[j]}, {breaks[j+1]}, {j})"'
+        for j in range(n_workers)])
+
+    a = time.time()
+    sp.call(clip_cmd, shell=True, stdout=null)
+    print(time.time() - a)
+
+
+def to_png_and_text():
+    for i in range(n_workers):
+        for j in range((n_docxs // n_workers) * i, (n_docxs // n_workers) * (i + 1)):
+            doc = docx.Document(PATH + f"/docxes/{i}/doc{j}.docx")
+            text = " ".join([p.text for p in doc.paragraphs])
+
+            with open(PATH + f"/texts/{j}.txt", "w+") as f:
+                f.write(text)
+                f.close()
+
+    cvt_cmd = " & ".join([f'libreoffice --nologo --nofirststartwizard --headless --invisible -env:UserInstallation=file:///home/amankp/.config/libreoffice/workers/user{i} --convert-to png {PATH}/docxes/{i}/* --outdir {PATH}/pngs' for i in range(n_workers)])
+    sp.call(cvt_cmd, shell=True, stdout=null)
+
+
+# to_docx()
+to_png_and_text()

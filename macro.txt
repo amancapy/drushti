@@ -1,0 +1,22 @@
+Sub del(start as integer, end_ as integer, subdir as integer)
+  Dim doc, cursor
+  Dim props2(0) As New com.sun.star.beans.PropertyValue
+  Dim props(0) As New com.sun.star.beans.PropertyValue
+  props(0).Name="Hidden"
+  props(0).Value=True
+
+  For i = start To end_-1
+    doc = StarDesktop.LoadComponentFromUrl("file:///home/amankp/drst/docxes/" + subdir + "/doc" + i + ".docx", "_default", 0, props)
+    cursor = doc.CurrentController.getViewCursor()
+    cursor.gotoStart(false)
+    If cursor.jumpToNextPage() Then
+      cursor.gotoEnd(true)
+      cursor.setString("")
+    End If
+
+  doc.store(props1)
+  doc.close(true)
+
+  Next i
+
+End Sub
