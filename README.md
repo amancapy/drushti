@@ -3,6 +3,8 @@ Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
 
 Timeline:
 
+10/4: T-1 one day for being done with the data generation. With the generous help of libreoffice forum members, finally the "delete everything after first page" is possible with a simple libre macro now. All that remains is to distribute it across user profiles so that cpu can be fully utilized.
+
 
 8/4: Still frustratingly stuck on the pdf-png conversion, which will be the final step in being done with the data generation. What's annoying is that I am for now unable to clip the text where the pdf ends because pdf encoding means I can't directly know what the last word in the text is. Still I hope it won't be too much trouble this far in.
 
