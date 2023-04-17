@@ -3,6 +3,8 @@ Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
 
 Timeline:
 
+15/4: The data is ready. There was a small bug that I missed which I only caught after generating 100k pairs, but after regeneration the data is now perfect to a large degree of confidence.
+
 10/4 (day): Scratch-to-PNG pipeline is complete and faster than I could hope for in my wildest dreams (exaggeration). Now comes a little bit of fun with making the images look like realistic scans with some cv stuff. After which comes the scary part, actually getting started with the model.
 
 
