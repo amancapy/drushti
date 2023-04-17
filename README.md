@@ -1,6 +1,8 @@
 # drushti
 Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
 
+A small (20k) sample of data is available [here!](https://www.kaggle.com/datasets/amancapy/telugu-scans) :)
+
 Timeline:
 
 15/4: The data is ready. There was a small bug that I missed which I only caught after generating 100k pairs, but after regeneration the data is now perfect to a large degree of confidence.
