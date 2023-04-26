@@ -5,6 +5,10 @@ A small (20k) sample of data is available [here!](https://www.kaggle.com/dataset
 
 Timeline:
 
+25/4: What do you know, another bug deep in the letter generation part. Including the stop vowel (*nakaarapollu*) in the vowel pool means that there would be false consonant diacritics added to any letter in the middle of the word. This sometimes results in triple consonant diacritics, when doubles themselves are exceedingly rare, not to mention triples being literally unpronouncable. 
+
+That aside, have a pretty solid idea for what the target tensors should look like. A 5xD tensor where the first row is the base letter, second and third rows are possible consonant diacritics, and fourth is a possible vowel diacritic. The fifth accounts for all non-Telugu characters, and the sixth is for digits. Although this could be a 1d vector, this "feels" more proper. The choice remains whether to one-hot each column or let them all be dense. From what I have read, indexing the token bank with dense predictions is somewhat expensive, but one-hots would result in very wide target tensors. Exams approach; I will pick this project back up come summer.
+
 15/4: The data is ready. There was a small bug that I missed which I only caught after generating 100k pairs, but after regeneration the data is now perfect to a large degree of confidence.
 
 10/4 (day): Scratch-to-PNG pipeline is complete and faster than I could hope for in my wildest dreams (exaggeration). Now comes a little bit of fun with making the images look like realistic scans with some cv stuff. After which comes the scary part, actually getting started with the model.
