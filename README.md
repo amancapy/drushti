@@ -5,7 +5,7 @@ A small (20k) sample of data is available [here!](https://www.kaggle.com/dataset
 
 Timeline:
 
-25/4: What do you know, another bug deep in the letter generation part. Including the stop vowel (*nakaarapollu*) in the vowel pool means that there would be false consonant diacritics added to any letter in the middle of the word. This sometimes results in triple consonant diacritics, when doubles themselves are exceedingly rare, not to mention triples being literally unpronouncable. 
+25/4: What do you know, another bug deep in the letter generation part. Including the stop vowel (*nakaarapollu*) in the vowel pool means that there would be false consonant diacritics added to any letter in the middle of the word. This sometimes results in triple consonant diacritics, when doubles themselves are exceedingly rare, not to mention triples being literally unpronouncable. With that fixed, the data is now perfect, if not for the fact that some of the font styles were lazily thrown together and misbehave in some alignments. I am letting them stay to account for real documents that may be badly formatted.
 
 That aside, have a pretty solid idea for what the target tensors should look like. A 5xD tensor where the first row is the base letter, second and third rows are possible consonant diacritics, and fourth is a possible vowel diacritic. The fifth accounts for all non-Telugu characters, and the sixth is for digits. Although this could be a 1d vector, this "feels" more proper. The choice remains whether to one-hot each column or let them all be dense. From what I have read, indexing the token bank with dense predictions is somewhat expensive, but one-hots would result in very wide target tensors. Exams approach; I will pick this project back up come summer.
 
