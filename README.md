@@ -1,5 +1,5 @@
 # drushti
-Deep Reading of Scanned Texts with 2D self-attention (WIP, far from fruition)
+Deep Reading of Scanned Texts with 2D self-attention (WIP)
 
 A small (20k) sample of data is available [here!](https://www.kaggle.com/datasets/amancapy/telugu-scans) :)
 
