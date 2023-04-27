@@ -7,18 +7,21 @@ _start = 0x0c00
 _all_chars = set(list(range(103)))
 
 _consonants = [*range(21, 41), *range(42, 49), *range(50, 52), *range(53, 58)]
+_consonants = [_start + c for c in _consonants]
 
 _vowels = [*range(5, 13), *range(14, 17), *range(18, 21), *(96,)]
+_vowels = [_start + c for c in _vowels]
 
-_vowel_diacs = [1, 2, 3, *range(62, 69), *range(70, 73), *range(74, 78)]
+_vowel_diacs = [1, 2, 3, *range(62, 69), *range(70, 73), *range(74, 77)]
+_vowel_diacs = [_start + c for c in _vowel_diacs]
 
-_depr = [0, 4, 12, 13, 17, 41, 49, 52, 58, 59, 60, 61, 69, 73, 78, 79, 80, 81, 82, 83, 84, 87, 88, 89, 90, 91, 92, 93,
-         94, 95, 97, 100, 101, 102, 103, 104, 105, 106, 107]
+# _depr = [0, 4, 12, 13, 17, 41, 49, 52, 58, 59, 60, 61, 69, 73, 78, 79, 80, 81, 82, 83, 84, 87, 88, 89, 90, 91, 92, 93,
+#          94, 95, 97, 100, 101, 102, 103, 104, 105, 106, 107]
 
-_pruned = _all_chars.difference(_depr)
+# _pruned = _all_chars.difference(_depr)
 
-_puncs = [c for c in "\"#$%&'()*+-/<=>@[\\]^`{|}~-_~"]
-_breaks = [c for c in ",:;"]
+_puncs = list("\"#$%&'()*+-/<=>@[\\]^`{|}~-_~")
+_breaks = list(",:;")
 
 _eng_chars = "abcdefghijklmnopqrstuvwxyz"
 _eng_chars = list(_eng_chars + _eng_chars.upper())
@@ -38,34 +41,35 @@ def _p_dist(u, s, l):
     return ps
 
 
-def letter(first=False):
+def letter(first=False, last=False):
     if _prob(0.05):
-        return "".join(random.choice(_puncs))
+        return random.choice(_puncs)
 
     if first:
         if _prob(0.5):
-            return "".join(chr(_start + random.choice(_vowels)))
+            return str(chr(random.choice(_vowels)))
 
-    ltr = [chr(_start + random.choice(_consonants))]
+    ltr = [chr(random.choice(_consonants))]
 
-    cons = None
     if _prob(0.2):
-        ltr.append(chr(_start + 77))
+        cons_diacs = []
 
         cons = random.choice(_consonants)
-        ltr.append(chr(_start + cons))
+        cons_diacs.append(chr(cons))
 
-        if _prob(0.01):
-            ltr.append(chr(_start + 77))
-
+        if _prob(0.2):
             cons2 = random.choice(_consonants)
-            ltr.append(chr(_start + cons2))
+            cons_diacs.append(chr(cons2))
 
-    if _prob(0.9):
-        if cons is not None and cons == 57:
-            ltr.append(chr(_start + random.choice(_vowel_diacs + [85])))
-        else:
-            ltr.append(chr(_start + random.choice(_vowel_diacs)))
+        cons_diacs.sort()
+        for cd in cons_diacs:
+            ltr.extend([chr(_start + 77), cd])
+
+    if last and _prob(0.1):
+        ltr.append(chr(_start + 77))
+
+    elif _prob(0.9):
+        ltr.append(chr(random.choice(_vowel_diacs)))
 
     return "".join(ltr)
 
@@ -80,14 +84,9 @@ def word(ln=None):
             if _prob(0.2) \
             else "".join(np.random.choice(_eng_chars, size=random.randint(1, 10)))
 
-    w = [letter(first=True)]
     ln = np.random.choice(range(1, _w_L + 1), p=_w_ps) if ln is None else ln
-    for _ in range(ln):
-        w.append(letter())
+    w = [letter(first=True)] + [letter() for _ in range(ln-2)] + [letter(last=True)]
 
-    w = "".join(w)
-    for c, replacement in zip(('&', '<', '>'), ("&amp;", "&lt;", "&gt;")):
-        w = w.replace(c, replacement)
     return "".join(w)
 
 
@@ -95,16 +94,14 @@ _s_L = 100
 _s_ps = _p_dist(15.5, 5.5, _s_L)
 
 
-def sentence(ln=None):
+def sentence(wn=None):
     s = []
-    ln = np.random.choice(range(1, _s_L + 1), p=_s_ps) if ln is None else ln
-    for _ in range(ln - 1):
+    wn = np.random.choice(range(1, _s_L + 1), p=_s_ps) if wn is None else wn
+    for _ in range(wn - 1):
         s.append(word())
-        if _prob(0.3):
+        if _prob(0.2):
             s[-1] += (random.choice(_breaks))
-
-    s.append(word())
-    s[-1] += (str(np.random.choice(list(".?!"), p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4), p=[0.4, 0.4, 0.2]))
+    s.append(word() + str(np.random.choice(list(".?!"), p=[0.5, 0.25, 0.25])) * np.random.choice(range(1, 4), p=[0.4, 0.4, 0.2]))
     return s
 
 
@@ -112,14 +109,17 @@ _p_L = 15
 _p_ps = _p_dist(6, 5, _p_L)
 
 
-def paragraph(ln=None):
-    ln = np.random.choice(range(1, _p_L + 1), p=_p_ps) if ln is None else ln
-    p = [sentence() for _ in range(ln)]
+def paragraph(sn=None):
+    sn = np.random.choice(range(1, _p_L + 1), p=_p_ps) if sn is None else sn
+    p = [sentence() for _ in range(sn)]
 
     return p
 
 
 def word_xml(text, bold=False, italics=False, underline=False, strikethrough=False):
+    for c, replacement in zip(('&', '<', '>'), ("&amp;", "&lt;", "&gt;")):
+        text = text.replace(c, replacement)
+
     w = formats['word']['body']
     for choice, replacement in zip((bold, italics, underline, strikethrough), formats['word']['params'].keys()):
         if choice:
@@ -137,7 +137,7 @@ def paragraph_xml(p, style="Normal",  f_size=30, f_name="Gautami"):
     run = ""
     for s in p:
         for w in s:
-            b, i, u, s = _prob(0.03), _prob(0.03), _prob(0.01), _prob(0.01)
+            b, i, u, s = _prob(0.005), _prob(0.03), _prob(0.001), _prob(0.0005)
             if not (b or i or u or s):
                 run += w + " "
             else:
@@ -145,6 +145,8 @@ def paragraph_xml(p, style="Normal",  f_size=30, f_name="Gautami"):
                     body += word_xml(run + " ", False, False, False, False)
                     run = ""
                 body += word_xml(w + " ", bold=b, italics=i, underline=u, strikethrough=s)
+    if run:
+        body += word_xml(run + " ", False, False, False, False)
 
     body = formats['paragraph']['body'].replace("word_here", body)
 
@@ -171,29 +173,31 @@ def header_footer_xml(horf="h", w1=None, w2=None, w3=None):
     return body
 
 
+def header_footer_gen(horf):
+    ws = [word() if _prob(0.5) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
+
+    if horf == "h":
+        return header_footer_xml("h", *ws)
+    else:
+        return header_footer_xml("f", *ws)
+
+
+n_newlines = _p_dist(1, 3, 15)
 def docgen():
     body = ""
     run = []
 
     for _ in range(random.randint(1, 4)):
         if _prob(0.2):
-            p = [[word() + " " for _ in range(random.randint(1, 10))]]
-            body += paragraph_xml(
-                p,
-                style="Heading",
-                f_size=random.randint(30, 45),
-                f_name=random.choice(fonts))
+            p = [sentence(random.randint(1, 10))]
+            body += paragraph_xml([]) * np.random.choice(range(15), p=n_newlines)
+            body += paragraph_xml(p, style="Heading", f_size=random.randint(35, 45), f_name=random.choice(fonts))
             run.append(p)
 
         p = paragraph()
+        body += paragraph_xml([]) * random.randint(0, 3)
         body += paragraph_xml(p, style="Normal", f_size=random.randint(30, 40), f_name=random.choice(fonts))
-
         run.append(p)
-
-        if _prob(0.2):
-            body += paragraph_xml([[("*" + random.randint(1, 5) * " ") * random.randint(2, 7)]], style="Heading", f_size=random.randint(30, 55), f_name=random.choice(fonts))
-
-        body += paragraph_xml([["\n" * random.randint(1, 3)]], f_name=random.choice(fonts))
 
         for key in formats['paragraph']['params'].keys():
             body = body.replace(key, str(random.choice(formats['paragraph']['params'][key])))
@@ -203,14 +207,5 @@ def docgen():
         body = body.replace(key, str(random.choice(formats['document']['params'][key])))
 
     return body, run
-
-
-def header_footer_gen(horf):
-    ws = [word() if _prob(0.5) else str(random.randint(1, 1000)) if _prob(0.33) else None for _ in range(3)]
-
-    if horf == "h":
-        return header_footer_xml("h", *ws)
-    else:
-        return header_footer_xml("f", *ws)
 
 

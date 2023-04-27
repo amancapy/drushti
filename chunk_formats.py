@@ -1,6 +1,3 @@
-import os
-
-
 fonts = ["Baloo Tammudu 2", "Baloo Tammudu", "GIST-TLOTChandana", "Dhurjati", "GIST-TLOTDraupadi", "Gautami", "Gidugu",
          "Gurajada", "GIST-TLOTKrishna", "Lakki Reddy", "Lohit Telugu", "Mallanna", "Mandali", "GIST-TLOTMenaka", "NTR",
          "GIST-TLOTPavani", "Peddanna", "Pothana2000", "GIST-TLOTRajani", "Ramabhadra", "RamaneeyaWin", "Ramaraja",
@@ -53,7 +50,7 @@ formats = {
             'spacing_before': range(350, 550),
             'spacing_after': range(0, 100),
             'font_name': fonts,
-            'font_size': range(30, 45),
+            'font_size': range(35, 45),
             'align': [*["left"] * 4, *["center"]*3, *["right"]*1, *["both"]*4]
         },
 
