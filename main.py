@@ -11,7 +11,7 @@ from multiprocessing import Pool
 
 
 """
-Variables
+Variables (! = done)
 
 indent !
 font size !
@@ -21,7 +21,6 @@ alignment !
 italics !
 bold (will hurt readability) !
 n. columns (for future)
-paper darkness (comes in post png)
 """
 
 
@@ -134,10 +133,10 @@ def chunks(lst, n):
 def to_text_and_png():
     args = [(i, 100 * i, 100 * (i+1)) for i in range(n_docxs // 100)]
 
-    # for chunk in chunks(args, 8):
-    #     pool = Pool(processes=8)
-    #     pool.map(to_text_subdir, chunk)
-    #     pool.close()
+    for chunk in chunks(args, 8):
+        pool = Pool(processes=8)
+        pool.map(to_text_subdir, chunk)
+        pool.close()
 
     for i in range(0, n_docxs // 100, 8):
         clip_cmd = " & ".join(
