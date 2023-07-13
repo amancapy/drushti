@@ -1,9 +1,10 @@
 # drushti
-Deep Reading of Scanned Texts with 2D self-attention (WIP)
+Image-Text Pairs for Native Language OCR Models
 
-A self-attention model to map image inputs directly to token sequences, for automated, fast digitization of scans of books and documents. The target sequences are designed to train the model to ignore headers, numbering, etc. and focus only on the main text body.
 
-A small (20k) sample of data is available [here!](https://www.kaggle.com/datasets/amancapy/telugu-scans) :)
+~~A self-attention model to map image inputs directly to token sequences, for automated, fast digitization of scans of books and documents. The target sequences are designed to train the model to ignore headers, numbering, etc. and focus only on the main text body.~~ (Has been postponed until I have some free time in life; the data however is ready :)
+
+A small (20k) sample of data is available [here!](https://www.kaggle.com/datasets/amancapy/telugu-scans)
 
 --------------------------------
 
