@@ -4,7 +4,6 @@ import zipfile
 import shutil
 import tqdm
 from stringgen import docgen, header_footer_gen
-import subprocess as sp
 from distutils.dir_util import copy_tree
 import docx
 from multiprocessing import Pool
@@ -24,13 +23,15 @@ n. columns (for future)
 """
 
 
-PATH = "/home/amankp/drst"
-n_docxs = 100000
+PATH = "/home/aman/drst"
+n_docxs = 20000
 n_subdirs = 32
 
 if not os.path.exists(PATH):
     os.mkdir(PATH)
 
+if not os.path.exists("filing"):
+    os.mkdir("filing")
 
 for subdirname in ("docxes", "dev", "texts", "pngs"):
     if not os.path.exists(PATH + "/" + subdirname):
@@ -43,17 +44,16 @@ for i in range(n_subdirs):
         os.mkdir(PATH + f"/docxes/{i}")
 
 
-if os.path.exists("/home/amankp/.config/libreoffice/workers"):
-    shutil.rmtree("/home/amankp/.config/libreoffice/workers")
-os.mkdir("/home/amankp/.config/libreoffice/workers")
+if os.path.exists("/home/aman/.config/libreoffice/workers"):
+    shutil.rmtree("/home/aman/.config/libreoffice/workers")
+os.mkdir("/home/aman/.config/libreoffice/workers")
 
 for i in range(8):
-    copy_tree("/home/amankp/.config/libreoffice/4", f"/home/amankp/.config/libreoffice/workers/user{i}")
+    copy_tree("/home/aman/.config/libreoffice/4", f"/home/aman/.config/libreoffice/workers/user{i}")
 
 
 def to_docx_subdir(args):
     start, end, subdir = args
-
     for i in tqdm.tqdm(range(start, end)):
         shutil.copy("template.zip", f"filing/temptemplate{subdir}.zip")
         if not os.path.exists(f"filing/temp{subdir}"):
@@ -89,17 +89,17 @@ def to_docx():
     for i in range(0, n_subdirs, 8):
         clip_cmd = " & ".join([
             f'soffice --nologo --nofirststartwizard --norestore'
-            f' -env:UserInstallation=file:///home/amankp/.config/libreoffice/workers/user{j}'
+            f' -env:UserInstallation=file:///home/aman/.config/libreoffice/workers/user{j}'
             f' "macro:///Standard.Module1.del({breaks[j] + i * n_docxs // n_subdirs}, {breaks[j + 1] + i * n_docxs // n_subdirs}, {i + j})"'
             for j in range(8)])
 
         a = time.time()
         print(clip_cmd)
-        sp.call(clip_cmd, shell=True, stdout=null)
+        os.system(clip_cmd)
         print(time.time() - a)
 
-        time.sleep(570)
-        sp.call("killall soffice.bin", shell=True)
+        time.sleep(600)
+        os.system("killall soffice.bin")
         time.sleep(30)
 
     for i in range(n_subdirs):
@@ -141,19 +141,30 @@ def to_text_and_png():
     for i in range(0, n_docxs // 100, 8):
         clip_cmd = " & ".join(
             [f'libreoffice --nologo --nofirststartwizard --headless --norestore'
-             f' -env:UserInstallation=file:///home/amankp/.config/libreoffice/workers/user{j}'
+             f' -env:UserInstallation=file:///home/aman/.config/libreoffice/workers/user{j}'
              f' --convert-to png --outdir {PATH}/pngs {PATH}/docxes/{i+j}/*' for j in range(8)]
         )
         print(clip_cmd)
 
         a = time.time()
-        sp.call(clip_cmd, shell=True, stdout=null)
+        os.system(clip_cmd)
         print(time.time() - a)
 
         time.sleep(10)
-        sp.call("killall soffice.bin", shell=True)
+        os.system("killall soffice.bin")
         time.sleep(5)
 
 
-# to_docx()
+def png_fail_corrector():
+    successes = os.listdir(f"{PATH}/pngs")
+
+    to_fix = []
+    for i in range(n_docxs):
+        if f"doc{i}.png" not in successes:
+            to_fix.append(i)
+    
+    cmd = f'libreoffice --nologo --nofirststartwizard --headless --norestore  
+    --convert-to png --outdir {PATH}/pngs ' + " ".join([f""])
+
+to_docx()
 to_text_and_png()

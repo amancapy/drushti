@@ -4,7 +4,6 @@ import numpy as np
 
 
 _start = 0x0c00
-_all_chars = set(list(range(103)))
 
 _consonants = [*range(21, 41), *range(42, 49), *range(50, 52), *range(53, 58)]
 _consonants = [_start + c for c in _consonants]
@@ -15,11 +14,6 @@ _vowels = [_start + c for c in _vowels]
 _vowel_diacs = [1, 2, 3, *range(62, 69), *range(70, 73), *range(74, 77)]
 _vowel_diacs = [_start + c for c in _vowel_diacs]
 
-# _depr = [0, 4, 12, 13, 17, 41, 49, 52, 58, 59, 60, 61, 69, 73, 78, 79, 80, 81, 82, 83, 84, 87, 88, 89, 90, 91, 92, 93,
-#          94, 95, 97, 100, 101, 102, 103, 104, 105, 106, 107]
-
-# _pruned = _all_chars.difference(_depr)
-
 _puncs = list("\"#$%&'()*+-/<=>@[\\]^`{|}~-_~")
 _breaks = list(",:;")
 
@@ -27,6 +21,9 @@ _eng_chars = "abcdefghijklmnopqrstuvwxyz"
 _eng_chars = list(_eng_chars + _eng_chars.upper())
 
 _digs = list("0123456789")
+
+
+all_chars = [chr(c) for c in _consonants] + [chr(c) for c in _vowels] + [chr(c) for c in _vowel_diacs] + _puncs + _breaks + _eng_chars + _digs
 
 
 def _prob(p):
