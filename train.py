@@ -17,10 +17,10 @@ EMB_DIM = len(embeddings)
 def get_heatmap_updater():
     inputs = layers.Input((1024, 1024, 2))
 
-    x = layers.Conv2D(16, 8, 1, "same", activation="relu")(inputs)
-    x = layers.Conv2D(16, 8, 1, "same", activation="relu")(x)
-    x = layers.Conv2D(16, 8, 1, "same", activation="relu")(x)
-    x = layers.Conv2D(16, 8, 1, "same", activation="relu")(x)
+    x = layers.Conv2D(4, 8, 1, "same", activation="relu")(inputs)
+    x = layers.Conv2D(4, 8, 1, "same", activation="relu")(x)
+    x = layers.Conv2D(4, 8, 1, "same", activation="relu")(x)
+    x = layers.Conv2D(4, 8, 1, "same", activation="relu")(x)
     x = layers.Conv2D(1, 8, 1, "same", activation="sigmoid", activity_regularizer=regularizers.l2())(x)
 
     m = models.Model(inputs=inputs, outputs=x, name="heatmapper")
@@ -31,13 +31,13 @@ def get_reader():
     img_input = layers.Input((1024, 1024, 1))
     prev_pred = layers.Input((EMB_DIM, ))
 
-    x = layers.Conv2D(16, 16, activation="relu")(img_input)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
-    x = layers.Conv2D(16, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 16, activation="relu")(img_input)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
+    x = layers.Conv2D(4, 8, 2, activation="relu")(x)
     x = layers.Flatten()(x)
 
     x = layers.Dense(EMB_DIM, activation="tanh")(x)
@@ -57,60 +57,63 @@ NUM_SAMPLES = 20000
 heatmapper = get_heatmap_updater()
 reader = get_reader()
 
-map_opt = optimizers.Adam(learning_rate=0.001)
-read_opt = optimizers.Adam(learning_rate=0.00001)
+map_opt = optimizers.Adam(learning_rate=0.0001)
+read_opt = optimizers.Adam(learning_rate=0.0001)
 
 
+BATCH_SIZE = 4
 def train(steps=2000):
     for i in range(steps):
 
-        with tf.GradientTape() as map_tape, tf.GradientTape() as read_tape:
-            
+        imgs = []
+        batch_y = []
+
+        while len(batch_y) < BATCH_SIZE:
             valid = False
             while not valid:
                 try:
                     pick = random.randint(0, NUM_SAMPLES-1)
-                    y_true = open(f"{DRST_PATH}/texts/{pick}.txt", "r").read()
-                    y_true = y_true.strip()
-                    
                     img = cv2.imread(f"{DRST_PATH}/pngs/doc{pick}.png", cv2.IMREAD_GRAYSCALE)
                     img = cv2.resize(img, (1024, 1024))
                     img = tf.convert_to_tensor(img, dtype=tf.dtypes.float32) / 255.
                     img = -img + 1.
                     img = tf.expand_dims(img, axis=-1)
+                    
+                    y_true = open(f"{DRST_PATH}/texts/{pick}.txt", "r").read()
+                    y_true = y_true.strip()
+                    y_true = [embeddings[c] for c in y_true] + [embeddings["end"]]
+                    y_true = y_true[:5]
+
+                    imgs.append(img)
+                    batch_y.append(y_true)
+                    
                     valid = True
                     
                 except Exception as e:
                     pass
+
+        with tf.GradientTape() as map_tape, tf.GradientTape() as read_tape:
+            pred = tf.convert_to_tensor([embeddings["start"] for _ in range(BATCH_SIZE)])
+            maps = tf.zeros_like(imgs)
             
-            y_true = [embeddings[c] for c in y_true] + [embeddings["end"]]
-            y_true = y_true[:2]
-
-            map = tf.zeros_like(img)
-            pred = embeddings["start"]
-            
-            inp = tf.concat([img, map], axis=-1)
-
-            pred = tf.expand_dims(pred, 0)
-            inp = tf.expand_dims(inp, 0)
-
             preds = []
-            for j, _ in enumerate(y_true):
-                map = heatmapper(inp)
-                pred = reader([tf.multiply(map, img), pred])
-                preds.append(pred[0])
+            for _ in range(len(y_true)):
+                maps = heatmapper(tf.concat([imgs, maps], axis=-1))
+                pred = reader([tf.multiply(imgs, maps), pred])
+                preds.append(pred)
 
-                if not os.path.exists("maps"):
-                    os.mkdir("maps")
-                cv2.imwrite(f"maps/{i}_{j}.png", tf.multiply(map, img).numpy()[0] * 255.)
-            
-            total_loss = sum([losses.categorical_crossentropy(true, pred) for pred, true in zip(preds, y_true)])
-            print(i, float(total_loss))
-            
+            preds = tf.convert_to_tensor(preds)
+            preds = tf.transpose(preds, perm=[1, 0, 2])
+            batch_y = tf.convert_to_tensor(batch_y)
+
+            total_loss = losses.categorical_crossentropy(batch_y, preds)
+                
             map_grads = map_tape.gradient(total_loss, heatmapper.trainable_variables)
             read_grads = read_tape.gradient(total_loss, reader.trainable_variables)
 
             map_opt.apply_gradients(zip(map_grads, heatmapper.trainable_variables))
             read_opt.apply_gradients(zip(read_grads, reader.trainable_variables))
+            
+            print(i, float(tf.reduce_sum(total_loss)))
 
 train()
